@@ -14,7 +14,7 @@ from sheet import *
 codecs.register(lambda name: codecs.lookup('utf-8') if name == 'cp65001' else None)
 
 # Create the Reddit instance
-user_agent = ("pad_linker 0.2")
+user_agent = ("pad_linker 0.3")
 r = praw.Reddit(user_agent=user_agent)
 
 # and login
@@ -57,7 +57,7 @@ def createReply(a):
 		a = post[post.find("[[")+2:post.find("]]")]
 		info.insert(count, a)
 		post = post[post.find("]]")+2:]
-		count +=1
+		count += 1
 
 	count = 0
 	for i in range(0, len(info)):
@@ -106,11 +106,12 @@ def createReply(a):
 			break
 	if reply == "":
 		return None
-	reply += "\n\n^Call ^me ^with ^up ^to ^7 ^monster ^[[id]] ^or ^[[name]]. ^Contact ^my ^owner **[^here](https://www.reddit.com/message/compose/?to=hihoberry)**^."
+	reply += "\n\n^Call ^me ^with ^up ^to ^7 ^monster ^[[id]] ^or ^[[name]]. ^Contact ^my ^owner **[^here](https://www.reddit.com/message/compose/?to=hihoberry)**^.    \n^Submit ^a ^nickname ^suggestion **[^here](https://docs.google.com/forms/d/1kJH9Q0S8iqqULwrRqB9dSxMOMebZj6uZjECqi4t9_z0/edit)**^."
 	return reply
 
+numLimit = 200
 while True:
-	for submission in subreddit.get_new(limit=10):
+	for submission in subreddit.get_new(limit=numLimit):
 		# If we haven't replied to this post before
 		if submission.id not in posts_replied_to:
 			
@@ -121,14 +122,13 @@ while True:
 				reply = createReply(submission.selftext)
 				if reply != None:
 					# Reply to the post
-					
 					submission.add_comment(reply)
 					print "Bot replied to : ", submission.id
 
 				# Store the current id into our list
 				posts_replied_to.append(submission.id)
 
-	for comment in subreddit.get_comments(limit=200):
+	for comment in subreddit.get_comments(limit=numLimit):
 		if str(comment.author) != 'pad_bot' and comment.id not in comments_replied_to:
 			
 			if re.search("]]", comment.body):
@@ -150,5 +150,5 @@ while True:
 	with open("comments_replied_to.txt", "w") as f:
 		for comment_id in comments_replied_to:
 			f.write(comment_id + "\n")
-
-	time.sleep(20)
+	numLimit = 10
+	time.sleep(10)
