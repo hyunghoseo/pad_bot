@@ -5,8 +5,45 @@ from leader_skills import *
 from elements import *
 from awakenings import *
 from types1 import *
+from sheet import *
 
+teamSize = 6
 
+def getMonster(numID):
+	monster = next((item for item in monsters if item["id"] == numID), None)
+	if monster is None:
+		return None
+	return monster
+
+def getMonsterID(d, info):
+	x = None
+	if d == None or d == "name" or d == "beach" or d == "academy" or d == "school" or d == "lead":
+		x = None
+	else:
+		
+		try:
+			x = int(info)
+		except ValueError:
+			
+			try:
+				x = int(dump[d])
+			except KeyError:
+				monster = next((item for item in monsters if ((item["name"]).lower()).translate(None, '.') == d), None)
+				if monster != None:
+					x = monster["id"]
+				else:
+					if len(d) >= 4:
+						matching = [s for s in dumplist if s.startswith(d)]
+						if len(matching) > 0:
+							x = int(dump[matching[0]])
+						else:
+							monsterm = [item for item in monsters if item["name"].lower().startswith(d)]
+							if len(monsterm) == 1:
+								monster = monsterm[0]
+								x = monster["id"]
+							else:
+								x = None
+	return x
 
 def getIcon(num):
 	s = num/200
@@ -17,13 +54,18 @@ def getIcon(num):
 	N = str(num)
 	return "(http://puzzledragonx.com/en/monster.asp?n=" + str(num) + "#I/S" + S + "/C" + C + "/" + N + ")"
 
+def getSite(num):
+	if num == 0:
+		return ''
+	return "(http://puzzledragonx.com/en/search.asp?q=" + str(num) + ")"
+
 
 def createInfo(numID):
-	monster = next((item for item in monsters if item["id"] == numID), None)
+	monster = getMonster(numID)
 	if monster is None:
-		return None
+		return None;
 	
-	site = "http://puzzledragonx.com/en/search.asp?q=" + str(numID)
+	site = getSite(numID)
 	info = ""
 	ID = 'No.'
 	Name = ''
@@ -101,5 +143,55 @@ def createInfo(numID):
 	if AS != None:
 		Active = "AS (" + str(AS["max_cooldown"]) + "->" + str(AS["min_cooldown"]) + "): " + AS["effect"]
 
-	info = "* " + ID + " [**" + Name + "**](" + site + ")    \n" + Elements + " | " + Types + " | " + Rarity + " | " + Cost + "    \n" + Stats + "    \n" + Awoken + "    \n" + Leader + "    \n" + Active
+	info = "* " + ID + " [**" + Name + "**]" + site + "    \n" + Elements + " | " + Types + " | " + Rarity + " | " + Cost + "    \n" + Stats + "    \n" + Awoken + "    \n" + Leader + "    \n" + Active
 	return info
+
+def createTeam(t):
+	t = t.replace(' :', ':')
+	t = t.replace(': ', ':')
+	team = t[t.find(':')+1:]
+	team = team.replace(' /', '/')
+	team = team.replace('/ ', '/')
+	print team
+	count = 0
+	teamlist = []
+	while (team.find('/') != -1):
+		a = team[0:team.find('/')]
+		teamlist.insert(count, a)
+		team = team[team.find('/')+1:]
+		count += 1
+	teamlist.insert(count, team)
+	count += 1
+	while (count < 6):
+		teamlist.insert(count, '')
+		count += 1
+	
+	count = 0
+	myTeam = ""
+	for i in range(0, 6):
+		monID = getMonsterID(str(teamlist[i]), teamlist[i])
+		print monID
+		name = ""
+		mon = getMonster(monID)
+		
+		if mon == None:
+			monID = 0
+			name = "Flex"
+			monster = "[" + name + "]" + getIcon(monID)
+			count += 1
+		else:
+			name = ((str(mon["name"])).decode('unicode-escape')).encode("utf-8")
+			monster = "[[" + name + "]" + getIcon(monID) + "]" + getSite(monID)
+		myTeam += monster
+		if i == 0 or i == 4:
+			myTeam += " | "
+		else:
+			if i != 5:
+				myTeam += "|"
+	
+	if count == 6:
+		return None
+	return myTeam
+
+			
+
