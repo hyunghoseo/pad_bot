@@ -43,6 +43,9 @@ def getMonsterID(d, info):
 								x = monster["id"]
 							else:
 								x = None
+		except TypeError:
+			x = None
+
 	return x
 
 def getIcon(num):

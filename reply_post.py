@@ -69,6 +69,7 @@ def createReply(a):
 			d = ""
 		d = d.lower()
 		d = d.translate(None, '.')
+		
 
 		if d.startswith('team:'):
 			theTeam = createTeam(d)
@@ -78,6 +79,10 @@ def createReply(a):
 
 		else:
 			x = getMonsterID(d, info[i])
+			if x == None:
+				d = d.translate(None, ' ')
+				x = getMonsterID(d, info)
+
 			print x
 			if x != None and x not in xlist:
 				theInfo = createInfo(x)
@@ -136,7 +141,7 @@ while True:
 			for comment_id in comments_replied_to:
 				f.write(comment_id + "\n")
 		numLimit = 10
-		time.sleep(10)
+		time.sleep(20)
 	except (HTTPError, requests.ConnectionError):
 		print "Error, retrying in 2 min..."
 		time.sleep(120)
