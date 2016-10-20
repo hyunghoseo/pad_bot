@@ -9,10 +9,16 @@ from sheet import *
 
 teamSize = 6
 
+for item in monsters:
+	item.setdefault('pdx_id', None)
+
 def getMonster(numID):
-	monster = next((item for item in monsters if item["id"] == numID), None)
+	monster = next((item for item in monsters if item["pdx_id"] == numID), None)
 	if monster is None:
-		return None
+		monster = next((item for item in monsters if item["id"] == numID), None)
+
+		if monster is None:
+			return None
 	return monster
 
 def getMonsterID(d, info):
