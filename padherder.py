@@ -1,7 +1,5 @@
 import os
-from monsters import *
-from active_skills import *
-from leader_skills import *
+from monster_data import *
 from elements import *
 from awakenings import *
 from types1 import *
@@ -183,7 +181,7 @@ def createTeam(t):
 		name = ""
 		mon = getMonster(monID)
 		
-		if mon == None:
+		if mon == None or monID == None:
 			monID = 0
 			name = "Flex"
 			monster = "[" + name + "]" + getIcon(monID)

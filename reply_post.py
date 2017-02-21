@@ -19,13 +19,13 @@ user_agent = ("pad_linker 1.0")
 r = praw.Reddit(user_agent=user_agent)
 
 # and login
-r.login(REDDIT_USERNAME, REDDIT_PASS)
+r.login(REDDIT_USERNAME, REDDIT_PASS, disable_warning=True)
 
 # Have we run this code before? If not, create an empty list
 if not os.path.isfile("posts_replied_to.txt"):
 	posts_replied_to = []
 
-# If we have run the code before, load the list of posts we have replied to
+# Load the list of posts we have replied to
 else:
 	# Read the file into a list and remove any empty values
 	with open("posts_replied_to.txt", "r") as f:
@@ -37,7 +37,7 @@ else:
 if not os.path.isfile("comments_replied_to.txt"):
 	comments_replied_to = []
 
-# If we have run the code before, load the list of posts we have replied to
+# Load the list of posts we have replied to
 else:
 	# Read the file into a list and remove any empty values
 	with open("comments_replied_to.txt", "r") as f:
@@ -45,8 +45,10 @@ else:
 		comments_replied_to = comments_replied_to.split("\n")
 		comments_replied_to = filter(None, comments_replied_to)
 
-# Get the top 5 values from our subreddit
 subreddit = r.get_subreddit('PuzzleAndDragons')
+
+# Number of allowed monsters per post
+numLimit = 7
 
 def createReply(a):
 	post = a
@@ -91,17 +93,17 @@ def createReply(a):
 					reply += "\n\n-----------------------\n"
 					count += 1
 					xlist.insert(0, x)
-		if count == 7:
+		if count == numLimit:
 			break
 	if reply == "":
 		return None
-	reply += "\n\n^Call ^me ^with ^up ^to ^7 ^monster ^[[id]] ^or ^[[name]], ^OR ^[[team:lead/sub/sub/sub/sub/friend]].    \n^Contact ^my ^owner **[^here](https://www.reddit.com/message/compose/?to=hihoberry)**^. ^Submit ^a ^nickname ^suggestion **[^here](https://docs.google.com/forms/d/1kJH9Q0S8iqqULwrRqB9dSxMOMebZj6uZjECqi4t9_z0/edit)**^."
+	reply += "\n\n^Call ^me ^with ^up ^to ^"+numLimit+" ^monster ^[[id]] ^or ^[[name]], ^OR ^[[team:lead/sub/sub/sub/sub/friend]].    \n^Contact ^my ^owner **[^here](https://www.reddit.com/message/compose/?to=hihoberry)**^. ^Submit ^a ^nickname ^suggestion **[^here](https://docs.google.com/forms/d/1kJH9Q0S8iqqULwrRqB9dSxMOMebZj6uZjECqi4t9_z0/edit)**^."
 	return reply
 
-numLimit = 1000
+numInitSearch = 1000
 while True:
 	try: 
-		for submission in subreddit.get_new(limit=numLimit):
+		for submission in subreddit.get_new(limit=numInitSearch):
 			# If we haven't replied to this post before
 			if submission.id not in posts_replied_to:
 				
@@ -118,7 +120,7 @@ while True:
 					# Store the current id into our list
 					posts_replied_to.append(submission.id)
 
-		for comment in subreddit.get_comments(limit=numLimit):
+		for comment in subreddit.get_comments(limit=numInitSearch):
 			if str(comment.author) != 'pad_bot' and comment.id not in comments_replied_to:
 				
 				if re.search("]]", comment.body):
@@ -144,4 +146,5 @@ while True:
 		time.sleep(20)
 	except (HTTPError, requests.ConnectionError):
 		print "Error, retrying in 2 min..."
+		numLimit = 1000
 		time.sleep(120)
